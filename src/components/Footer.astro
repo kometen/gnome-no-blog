@@ -1,8 +1,11 @@
 ---
+import LanguagePicker from '../components/LanguagePicker.astro';
+
 const today = new Date();
 ---
 
 <footer>
+    <LanguagePicker />
 	&copy; {today.getFullYear()} Claus Guttesen. All rights reserved.
 	<div class="social-links">
 		<a href="https://m.webtoo.ls/@astro" target="_blank">
