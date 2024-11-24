@@ -1,0 +1,62 @@
+---
+---
+<button id="theme-toggle" aria-label="Toggle theme">
+  <span class="sun">🌞</span>
+  <span class="moon">🌙</span>
+</button>
+
+<style>
+  #theme-toggle {
+    padding: 0.5rem;
+    border: none;
+    background: lightgrey;
+    cursor: pointer;
+  }
+
+  .sun, .moon {
+    display: -webkit-box;
+  }
+
+  [data-theme="dark"] .moon {
+    display: block;
+  }
+
+  [data-theme="light"] .sun {
+    display: block;
+  }
+</style>
+
+<script>
+  // Check for saved theme preference, otherwise use system preference
+  const getPreferredTheme = (): Theme => {
+    const savedTheme = localStorage.getItem('theme') as Theme | null;
+    if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+      return savedTheme;
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  };
+
+  type Theme = 'light' | 'dark';
+
+  const setTheme = (theme: Theme) => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  };
+
+  // Set theme on load
+  setTheme(getPreferredTheme());
+
+  // Handle toggle button click
+  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+  });
+
+  // Listen for system theme changes
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (!localStorage.getItem('theme')) {
+      setTheme(e.matches ? 'dark' : 'light');
+    }
+  });
+</script>

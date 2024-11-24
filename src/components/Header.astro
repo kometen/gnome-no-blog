@@ -1,6 +1,7 @@
 ---
 import { getLangFromUrl, useTranslations } from '../i18n/utils';
 import HeaderLink from './HeaderLink.astro';
+import ThemeToggle from './ThemeToggle.astro';
 import { SITE_TITLE } from '../consts';
 
 const lang = getLangFromUrl(Astro.url);
@@ -8,9 +9,22 @@ const t = useTranslations(lang);
 ---
 
 <header>
+<script is:inline>
+     const theme = (() => {
+       if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+         return localStorage.getItem('theme');
+       }
+       if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+         return 'dark';
+       }
+       return 'light';
+     })();
+     document.documentElement.setAttribute('data-theme', theme);
+   </script>
 	<nav>
 		<h2><a href={`/${lang}`}>{SITE_TITLE}</a></h2>
 		<div class="internal-links">
+		<HeaderLink><ThemeToggle /></HeaderLink>
 			<HeaderLink href={`/${lang}`}>{t("nav.home")}</HeaderLink>
 			<HeaderLink href={`/${lang}/blog`}>Blog</HeaderLink>
 			<HeaderLink href={`/${lang}/about`}>{t("nav.about")}</HeaderLink>
@@ -50,7 +64,6 @@ const t = useTranslations(lang);
 	header {
 		margin: 0;
 		padding: 0 1em;
-		background: white;
 		box-shadow: 0 2px 8px rgba(var(--black), 5%);
 	}
 	h2 {
