@@ -44,6 +44,18 @@ nav a {
   color: var(--text-color);
 }
 
+.hero-image img {
+  display: block;
+  margin: 0 auto;
+  border-radius: 12px;
+  box-shadow: var(--box-shadow);
+}
+.small-hero {
+  max-width: 200px !important; /* or whatever size you prefer */
+  margin: 0 auto;
+  display: block;
+}
+
 .sun,
 .moon {
   display: none;
