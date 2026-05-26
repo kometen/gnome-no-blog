@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<title>Guitar Fretboard — Natural Notes</title>
+<!--
+  GUITAR FRETBOARD DIAGRAM
+  ========================
+  Layout  : Landscape — frets run left, nut (thick bar) on the RIGHT,
+            string number + open note label to the RIGHT of the nut.
+  Strings : Thinnest (e, string 1) at top — conventional player's view.
+  Notes   : Natural notes shown in bold. Sharps omitted by default (set
+            SHOW_SHARPS = true in the <script> below to reveal them).
+  Frets   : 12 frets shown. Dot markers at 3, 5, 7, 9, 12.
+  Theme   : Follows your system preference automatically (light/dark).
+            Click the ☀ / ☾ button to override.
+-->
+<style>
+  /* ── CSS custom properties — all colours live here ── */
+  :root {
+    --bg:           #f7f3ea;
+    --note-bg:      #f7f3ea;
+    --heading:      #999;
+    --fret-wire:    #aaa;
+    --fret-num:     #bbb;
+    --dot:          #ccc;
+    --note-text:    #1a1a1a;
+    --sharp-text:   #ccc;
+    --label-name:   #2a2218;
+    --label-num:    #aaa;
+    --nut-bg:       #2a2218;
+    --hint:         #bbb;
+    --btn-bg:       #e8e3d8;
+    --btn-border:   #ccc;
+    --btn-text:     #666;
+
+    /* String colours — warm browns, light mode */
+    --s1: #b8a890;
+    --s2: #a89880;
+    --s3: #988870;
+    --s4: #887860;
+    --s5: #786850;
+    --s6: #685840;
+  }
+
+  [data-theme="dark"] {
+    --bg:           #161412;
+    --note-bg:      #161412;
+    --heading:      #555;
+    --fret-wire:    #3a3530;
+    --fret-num:     #484440;
+    --dot:          #3a3530;
+    --note-text:    #e0d8c8;
+    --sharp-text:   #444;
+    --label-name:   #c8bfa8;
+    --label-num:    #555;
+    --nut-bg:       #6a5a3a;
+    --hint:         #444;
+    --btn-bg:       #252220;
+    --btn-border:   #3a3530;
+    --btn-text:     #888;
+
+    /* String colours — amber glow, dark mode */
+    --s1: #8a7a5a;
+    --s2: #7e7050;
+    --s3: #726448;
+    --s4: #665840;
+    --s5: #5c5038;
+    --s6: #504530;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--note-text);
+    font-family: Georgia, 'Times New Roman', serif;
+    padding: 36px 28px 28px;
+    min-width: 900px;
+    transition: background 0.35s, color 0.35s;
+  }
+
+  /* ── Theme toggle button ── */
+  #theme-btn {
+    position: fixed;
+    top: 18px;
+    right: 22px;
+    background: var(--btn-bg);
+    border: 1px solid var(--btn-border);
+    color: var(--btn-text);
+    font-size: 16px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.35s, border-color 0.35s;
+    z-index: 10;
+    user-select: none;
+  }
+  #theme-btn:hover { opacity: 0.75; }
+
+  /* ── Title ── */
+  h1 {
+    text-align: center;
+    font-size: 13px;
+    font-weight: normal;
+    letter-spacing: 4px;
+    color: var(--heading);
+    text-transform: uppercase;
+    margin-bottom: 26px;
+    transition: color 0.35s;
+  }
+
+  .fretboard-wrap { overflow-x: auto; }
+
+  table.fb {
+    border-collapse: collapse;
+    margin: 0 auto;
+  }
+
+  /* ── Fret-number rows ── */
+  tr.fret-nums td,
+  tr.fret-nums-bottom td {
+    text-align: center;
+    font-size: 10px;
+    color: var(--fret-num);
+    letter-spacing: 1px;
+    height: 18px;
+    transition: color 0.35s;
+  }
+  tr.fret-nums     td { padding-bottom: 8px; }
+  tr.fret-nums-bottom td { padding-top: 8px; }
+  tr.fret-nums td.nut-col,
+  tr.fret-nums-bottom td.nut-col { background: transparent; }
+
+  /* ── Dot-marker row ── */
+  tr.dots td {
+    text-align: center;
+    height: 14px;
+    vertical-align: middle;
+  }
+  .dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--dot);
+    vertical-align: middle;
+    transition: background 0.35s;
+  }
+
+  /* ── Fret cells ── */
+  tr.string-row td.fc {
+    width: 62px;
+    height: 34px;
+    border-left: 1px solid var(--fret-wire);
+    text-align: center;
+    vertical-align: middle;
+    position: relative;
+    transition: border-color 0.35s;
+  }
+
+  /* String line pseudo-element */
+  tr.string-row td.fc::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 0;
+    transition: background 0.35s;
+  }
+
+  /* String thicknesses */
+  tr.s1 td.fc::before { height: 1px; background: var(--s1); }
+  tr.s2 td.fc::before { height: 1px; background: var(--s2); }
+  tr.s3 td.fc::before { height: 2px; background: var(--s3); }
+  tr.s4 td.fc::before { height: 2px; background: var(--s4); }
+  tr.s5 td.fc::before { height: 3px; background: var(--s5); }
+  tr.s6 td.fc::before { height: 3px; background: var(--s6); }
+
+  /* ── Note label ── */
+  .n {
+    position: relative;
+    z-index: 1;
+    background: var(--note-bg);
+    padding: 1px 5px;
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--note-text);
+    display: inline-block;
+    line-height: 1.3;
+    transition: background 0.35s, color 0.35s;
+  }
+
+  .n.sharp {
+    font-size: 11px;
+    font-weight: normal;
+    color: var(--sharp-text);
+  }
+
+  /* ── NUT column ── */
+  td.nut-col {
+    width: 11px;
+    background: var(--nut-bg);
+    border-left: none;
+    border-right: none;
+    padding: 0;
+    transition: background 0.35s;
+  }
+
+  /* ── String label column (right of nut) ── */
+  td.label-col {
+    padding-left: 12px;
+    white-space: nowrap;
+    vertical-align: middle;
+    position: relative;
+  }
+
+  .lname {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--label-name);
+    transition: color 0.35s;
+  }
+
+  .lnum {
+    font-size: 10px;
+    color: var(--label-num);
+    margin-left: 4px;
+    letter-spacing: 1px;
+    transition: color 0.35s;
+  }
+
+  /* ── Hint line ── */
+  .note-hint {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 11px;
+    color: var(--hint);
+    letter-spacing: 1px;
+    transition: color 0.35s;
+  }
+</style>
+</head>
+<body>
+
+<button id="theme-btn" title="Toggle light / dark mode">☀</button>
+
+<h1>Guitar Fretboard &nbsp;·&nbsp; Natural Notes</h1>
+
+<div class="fretboard-wrap">
+  <table class="fb" id="fb"></table>
+</div>
+
+<p class="note-hint">
+  String 1 (thinnest) at top &nbsp;·&nbsp; Nut at right &nbsp;·&nbsp; Frets 1–12 (left = fret 12, right = fret 1)
+  &nbsp;·&nbsp; Dot markers at frets 3, 5, 7, 9, 12
+</p>
+
+<script>
+// ── Configuration ─────────────────────────────────────────────────────────────
+const SHOW_SHARPS = false;   // set true to display # notes in faint text
+const NUM_FRETS   = 12;
+
+// ── String data ───────────────────────────────────────────────────────────────
+// Index 0 = open string; index 1–12 = frets 1–12. Thinnest (1) → thickest (6).
+const STRINGS = [
+  { num: 1, name: 'e', cls: 's1',
+    notes: ['e','F','F#','G','G#','A','A#','B','C','C#','D','D#','e'] },
+  { num: 2, name: 'B', cls: 's2',
+    notes: ['B','C','C#','D','D#','E','F','F#','G','G#','A','A#','B'] },
+  { num: 3, name: 'G', cls: 's3',
+    notes: ['G','G#','A','A#','B','C','C#','D','D#','E','F','F#','G'] },
+  { num: 4, name: 'D', cls: 's4',
+    notes: ['D','D#','E','F','F#','G','G#','A','A#','B','C','C#','D'] },
+  { num: 5, name: 'A', cls: 's5',
+    notes: ['A','A#','B','C','C#','D','D#','E','F','F#','G','G#','A'] },
+  { num: 6, name: 'E', cls: 's6',
+    notes: ['E','F','F#','G','G#','A','A#','B','C','C#','D','D#','E'] },
+];
+
+const DOT_FRETS = new Set([3, 5, 7, 9, 12]);
+
+// ── Theme toggle ──────────────────────────────────────────────────────────────
+const html = document.documentElement;
+const btn  = document.getElementById('theme-btn');
+
+// Respect system preference on first load; override with saved choice
+function systemDark() {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function applyTheme(dark) {
+  html.setAttribute('data-theme', dark ? 'dark' : 'light');
+  btn.textContent = dark ? '☾' : '☀';
+  try { localStorage.setItem('fb-theme', dark ? 'dark' : 'light'); } catch(_) {}
+}
+
+// Initialise
+(function () {
+  let saved;
+  try { saved = localStorage.getItem('fb-theme'); } catch(_) {}
+  applyTheme(saved ? saved === 'dark' : systemDark());
+})();
+
+btn.addEventListener('click', () => {
+  applyTheme(html.getAttribute('data-theme') !== 'dark');
+});
+
+// Follow system changes unless the user has manually overridden
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+  let saved;
+  try { saved = localStorage.getItem('fb-theme'); } catch(_) {}
+  if (!saved) applyTheme(e.matches);
+});
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function td(cls, html) {
+  const el = document.createElement('td');
+  if (cls) el.className = cls;
+  if (html !== undefined) el.innerHTML = html;
+  return el;
+}
+
+function noteCell(note) {
+  const isSharp = note.includes('#');
+  if (isSharp && !SHOW_SHARPS) return td('fc');
+  return td('fc', `<span class="n${isSharp ? ' sharp' : ''}">${note}</span>`);
+}
+
+// ── Build table ───────────────────────────────────────────────────────────────
+// Column order: fret 12 … fret 1 | NUT | open-note + string-number
+const table = document.getElementById('fb');
+
+function makeNumRow(cls) {
+  const tr = document.createElement('tr');
+  tr.className = cls;
+  for (let f = NUM_FRETS; f >= 1; f--) tr.appendChild(td('', f));
+  tr.appendChild(td('nut-col'));
+  tr.appendChild(td('', ''));
+  return tr;
+}
+
+table.appendChild(makeNumRow('fret-nums'));
+
+STRINGS.forEach(str => {
+  const tr = document.createElement('tr');
+  tr.className = `string-row ${str.cls}`;
+  for (let f = NUM_FRETS; f >= 1; f--) tr.appendChild(noteCell(str.notes[f]));
+  tr.appendChild(td('nut-col'));
+  const label = td('label-col');
+  label.innerHTML =
+    `<span class="lname">${str.notes[0]}</span><span class="lnum">${str.num}</span>`;
+  tr.appendChild(label);
+  table.appendChild(tr);
+});
+
+// Dot marker row
+const dotRow = document.createElement('tr');
+dotRow.className = 'dots';
+for (let f = NUM_FRETS; f >= 1; f--) {
+  const cell = td('');
+  if (DOT_FRETS.has(f)) {
+    cell.innerHTML = f === 12
+      ? '<span class="dot"></span>&thinsp;<span class="dot"></span>'
+      : '<span class="dot"></span>';
+  }
+  dotRow.appendChild(cell);
+}
+dotRow.appendChild(td('nut-col'));
+dotRow.appendChild(td(''));
+table.appendChild(dotRow);
+
+table.appendChild(makeNumRow('fret-nums-bottom'));
+</script>
+
+</body>
+</html>
