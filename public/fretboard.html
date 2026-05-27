@@ -1,72 +1,70 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="light" data-hand="left">
 <head>
 <meta charset="UTF-8">
 <title>Guitar Fretboard — Natural Notes</title>
 <!--
   GUITAR FRETBOARD DIAGRAM
   ========================
-  Layout  : Landscape — frets run left, nut (thick bar) on the RIGHT,
-            string number + open note label to the RIGHT of the nut.
+  Layout  : Landscape. Left-handed: nut on the RIGHT, frets spread left.
+            Right-handed: nut on the LEFT, frets spread right.
+            Toggle with the L / R button (top-right corner).
   Strings : Thinnest (e, string 1) at top — conventional player's view.
   Notes   : Natural notes shown in bold. Sharps omitted by default (set
             SHOW_SHARPS = true in the <script> below to reveal them).
   Frets   : 12 frets shown. Dot markers at 3, 5, 7, 9, 12.
-  Theme   : Follows your system preference automatically (light/dark).
-            Click the ☀ / ☾ button to override.
+  Theme   : Follows system light/dark preference. ☀/☾ button to override.
 -->
 <style>
   /* ── CSS custom properties — all colours live here ── */
   :root {
-    --bg:           #f7f3ea;
-    --note-bg:      #f7f3ea;
-    --heading:      #999;
-    --fret-wire:    #aaa;
-    --fret-num:     #bbb;
-    --dot:          #ccc;
-    --note-text:    #1a1a1a;
-    --sharp-text:   #ccc;
-    --label-name:   #2a2218;
-    --label-num:    #aaa;
-    --nut-bg:       #2a2218;
-    --hint:         #bbb;
-    --btn-bg:       #e8e3d8;
-    --btn-border:   #ccc;
-    --btn-text:     #666;
+    --bg:         #f7f3ea;
+    --note-bg:    #f7f3ea;
+    --heading:    #999;
+    --fret-wire:  #aaa;
+    --fret-num:   #bbb;
+    --dot:        #ccc;
+    --note-text:  #1a1a1a;
+    --sharp-text: #ccc;
+    --label-name: #2a2218;
+    --label-num:  #aaa;
+    --nut-bg:     #2a2218;
+    --hint:       #bbb;
+    --btn-bg:     #e8e3d8;
+    --btn-border: #ccc;
+    --btn-text:   #666;
+    --btn-active-bg:     #c8b89a;
+    --btn-active-border: #b0a080;
+    --btn-active-text:   #4a3820;
 
-    /* String colours — warm browns, light mode */
-    --s1: #b8a890;
-    --s2: #a89880;
-    --s3: #988870;
-    --s4: #887860;
-    --s5: #786850;
-    --s6: #685840;
+    /* String colours — warm browns */
+    --s1: #b8a890;  --s2: #a89880;  --s3: #988870;
+    --s4: #887860;  --s5: #786850;  --s6: #685840;
   }
 
   [data-theme="dark"] {
-    --bg:           #161412;
-    --note-bg:      #161412;
-    --heading:      #555;
-    --fret-wire:    #3a3530;
-    --fret-num:     #484440;
-    --dot:          #3a3530;
-    --note-text:    #e0d8c8;
-    --sharp-text:   #444;
-    --label-name:   #c8bfa8;
-    --label-num:    #555;
-    --nut-bg:       #6a5a3a;
-    --hint:         #444;
-    --btn-bg:       #252220;
-    --btn-border:   #3a3530;
-    --btn-text:     #888;
+    --bg:         #161412;
+    --note-bg:    #161412;
+    --heading:    #555;
+    --fret-wire:  #3a3530;
+    --fret-num:   #484440;
+    --dot:        #3a3530;
+    --note-text:  #e0d8c8;
+    --sharp-text: #444;
+    --label-name: #c8bfa8;
+    --label-num:  #555;
+    --nut-bg:     #6a5a3a;
+    --hint:       #444;
+    --btn-bg:     #252220;
+    --btn-border: #3a3530;
+    --btn-text:   #888;
+    --btn-active-bg:     #4a3e28;
+    --btn-active-border: #6a5a3a;
+    --btn-active-text:   #c8b080;
 
-    /* String colours — amber glow, dark mode */
-    --s1: #8a7a5a;
-    --s2: #7e7050;
-    --s3: #726448;
-    --s4: #665840;
-    --s5: #5c5038;
-    --s6: #504530;
+    /* String colours — amber glow */
+    --s1: #8a7a5a;  --s2: #7e7050;  --s3: #726448;
+    --s4: #665840;  --s5: #5c5038;  --s6: #504530;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -80,27 +78,41 @@
     transition: background 0.35s, color 0.35s;
   }
 
-  /* ── Theme toggle button ── */
-  #theme-btn {
+  /* ── Button cluster (top-right) ── */
+  #controls {
     position: fixed;
     top: 18px;
     right: 22px;
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+  }
+
+  .ctrl-btn {
     background: var(--btn-bg);
     border: 1px solid var(--btn-border);
     color: var(--btn-text);
-    font-size: 16px;
-    width: 34px;
+    font-family: Georgia, serif;
+    font-size: 13px;
     height: 34px;
-    border-radius: 50%;
+    padding: 0 11px;
+    border-radius: 17px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: background 0.35s, border-color 0.35s;
-    z-index: 10;
+    gap: 5px;
+    transition: background 0.35s, border-color 0.35s, color 0.2s;
     user-select: none;
+    white-space: nowrap;
   }
-  #theme-btn:hover { opacity: 0.75; }
+  .ctrl-btn:hover { opacity: 0.8; }
+
+  /* Highlighted state for the active hand button */
+  .ctrl-btn.active {
+    background: var(--btn-active-bg);
+    border-color: var(--btn-active-border);
+    color: var(--btn-active-text);
+  }
 
   /* ── Title ── */
   h1 {
@@ -133,19 +145,12 @@
   }
   tr.fret-nums     td { padding-bottom: 8px; }
   tr.fret-nums-bottom td { padding-top: 8px; }
-  tr.fret-nums td.nut-col,
-  tr.fret-nums-bottom td.nut-col { background: transparent; }
 
   /* ── Dot-marker row ── */
-  tr.dots td {
-    text-align: center;
-    height: 14px;
-    vertical-align: middle;
-  }
+  tr.dots td { text-align: center; height: 14px; vertical-align: middle; }
   .dot {
     display: inline-block;
-    width: 7px;
-    height: 7px;
+    width: 7px; height: 7px;
     border-radius: 50%;
     background: var(--dot);
     vertical-align: middle;
@@ -163,7 +168,7 @@
     transition: border-color 0.35s;
   }
 
-  /* String line pseudo-element */
+  /* String line */
   tr.string-row td.fc::before {
     content: '';
     position: absolute;
@@ -171,7 +176,7 @@
     top: 50%;
     transform: translateY(-50%);
     z-index: 0;
-    transition: background 0.35s;
+    transition: background 0.35s, height 0.35s;
   }
 
   /* String thicknesses */
@@ -182,7 +187,7 @@
   tr.s5 td.fc::before { height: 3px; background: var(--s5); }
   tr.s6 td.fc::before { height: 3px; background: var(--s6); }
 
-  /* ── Note label ── */
+  /* Note label */
   .n {
     position: relative;
     z-index: 1;
@@ -195,12 +200,7 @@
     line-height: 1.3;
     transition: background 0.35s, color 0.35s;
   }
-
-  .n.sharp {
-    font-size: 11px;
-    font-weight: normal;
-    color: var(--sharp-text);
-  }
+  .n.sharp { font-size: 11px; font-weight: normal; color: var(--sharp-text); }
 
   /* ── NUT column ── */
   td.nut-col {
@@ -212,13 +212,15 @@
     transition: background 0.35s;
   }
 
-  /* ── String label column (right of nut) ── */
+  /* ── String label column ── */
   td.label-col {
-    padding-left: 12px;
     white-space: nowrap;
     vertical-align: middle;
-    position: relative;
   }
+  /* Label on the right (left-handed): pad on the left */
+  [data-hand="left"]  td.label-col { padding-left: 12px; }
+  /* Label on the left (right-handed): pad on the right */
+  [data-hand="right"] td.label-col { padding-right: 12px; text-align: right; }
 
   .lname {
     font-size: 16px;
@@ -226,7 +228,6 @@
     color: var(--label-name);
     transition: color 0.35s;
   }
-
   .lnum {
     font-size: 10px;
     color: var(--label-num);
@@ -234,8 +235,9 @@
     letter-spacing: 1px;
     transition: color 0.35s;
   }
+  [data-hand="right"] .lnum { margin-left: 0; margin-right: 4px; }
 
-  /* ── Hint line ── */
+  /* ── Hint ── */
   .note-hint {
     text-align: center;
     margin-top: 18px;
@@ -248,7 +250,12 @@
 </head>
 <body>
 
-<button id="theme-btn" title="Toggle light / dark mode">☀</button>
+<!-- Button cluster -->
+<div id="controls">
+  <button class="ctrl-btn active" id="btn-left"  title="Left-handed layout (nut on the right)">✦ Left-handed</button>
+  <button class="ctrl-btn"        id="btn-right" title="Right-handed layout (nut on the left)">Right-handed ✦</button>
+  <button class="ctrl-btn"        id="btn-theme" title="Toggle light / dark mode">☀</button>
+</div>
 
 <h1>Guitar Fretboard &nbsp;·&nbsp; Natural Notes</h1>
 
@@ -256,126 +263,168 @@
   <table class="fb" id="fb"></table>
 </div>
 
-<p class="note-hint">
-  String 1 (thinnest) at top &nbsp;·&nbsp; Nut at right &nbsp;·&nbsp; Frets 1–12 (left = fret 12, right = fret 1)
-  &nbsp;·&nbsp; Dot markers at frets 3, 5, 7, 9, 12
-</p>
+<p class="note-hint" id="hint"></p>
 
 <script>
 // ── Configuration ─────────────────────────────────────────────────────────────
 const SHOW_SHARPS = false;   // set true to display # notes in faint text
 const NUM_FRETS   = 12;
 
-// ── String data ───────────────────────────────────────────────────────────────
-// Index 0 = open string; index 1–12 = frets 1–12. Thinnest (1) → thickest (6).
+// ── String data (index 0 = open; 1–12 = frets 1–12; thin → thick) ────────────
 const STRINGS = [
-  { num: 1, name: 'e', cls: 's1',
-    notes: ['e','F','F#','G','G#','A','A#','B','C','C#','D','D#','e'] },
-  { num: 2, name: 'B', cls: 's2',
-    notes: ['B','C','C#','D','D#','E','F','F#','G','G#','A','A#','B'] },
-  { num: 3, name: 'G', cls: 's3',
-    notes: ['G','G#','A','A#','B','C','C#','D','D#','E','F','F#','G'] },
-  { num: 4, name: 'D', cls: 's4',
-    notes: ['D','D#','E','F','F#','G','G#','A','A#','B','C','C#','D'] },
-  { num: 5, name: 'A', cls: 's5',
-    notes: ['A','A#','B','C','C#','D','D#','E','F','F#','G','G#','A'] },
-  { num: 6, name: 'E', cls: 's6',
-    notes: ['E','F','F#','G','G#','A','A#','B','C','C#','D','D#','E'] },
+  { num:1, name:'e', cls:'s1', notes:['e','F','F#','G','G#','A','A#','B','C','C#','D','D#','e'] },
+  { num:2, name:'B', cls:'s2', notes:['B','C','C#','D','D#','E','F','F#','G','G#','A','A#','B'] },
+  { num:3, name:'G', cls:'s3', notes:['G','G#','A','A#','B','C','C#','D','D#','E','F','F#','G'] },
+  { num:4, name:'D', cls:'s4', notes:['D','D#','E','F','F#','G','G#','A','A#','B','C','C#','D'] },
+  { num:5, name:'A', cls:'s5', notes:['A','A#','B','C','C#','D','D#','E','F','F#','G','G#','A'] },
+  { num:6, name:'E', cls:'s6', notes:['E','F','F#','G','G#','A','A#','B','C','C#','D','D#','E'] },
 ];
 
 const DOT_FRETS = new Set([3, 5, 7, 9, 12]);
 
-// ── Theme toggle ──────────────────────────────────────────────────────────────
-const html = document.documentElement;
-const btn  = document.getElementById('theme-btn');
+// ── State ─────────────────────────────────────────────────────────────────────
+const html     = document.documentElement;
+const table    = document.getElementById('fb');
+const hintEl   = document.getElementById('hint');
+const btnLeft  = document.getElementById('btn-left');
+const btnRight = document.getElementById('btn-right');
+const btnTheme = document.getElementById('btn-theme');
 
-// Respect system preference on first load; override with saved choice
-function systemDark() {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches;
-}
-
+// ── Theme ─────────────────────────────────────────────────────────────────────
 function applyTheme(dark) {
   html.setAttribute('data-theme', dark ? 'dark' : 'light');
-  btn.textContent = dark ? '☾' : '☀';
+  btnTheme.textContent = dark ? '☾' : '☀';
   try { localStorage.setItem('fb-theme', dark ? 'dark' : 'light'); } catch(_) {}
 }
 
-// Initialise
-(function () {
-  let saved;
-  try { saved = localStorage.getItem('fb-theme'); } catch(_) {}
-  applyTheme(saved ? saved === 'dark' : systemDark());
+(function initTheme() {
+  let saved; try { saved = localStorage.getItem('fb-theme'); } catch(_) {}
+  applyTheme(saved ? saved === 'dark'
+                   : window.matchMedia('(prefers-color-scheme: dark)').matches);
 })();
 
-btn.addEventListener('click', () => {
-  applyTheme(html.getAttribute('data-theme') !== 'dark');
-});
+btnTheme.addEventListener('click', () =>
+  applyTheme(html.getAttribute('data-theme') !== 'dark'));
 
-// Follow system changes unless the user has manually overridden
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-  let saved;
-  try { saved = localStorage.getItem('fb-theme'); } catch(_) {}
+  let saved; try { saved = localStorage.getItem('fb-theme'); } catch(_) {}
   if (!saved) applyTheme(e.matches);
 });
 
+// ── Handedness ────────────────────────────────────────────────────────────────
+function applyHand(hand) {
+  // hand = 'left' | 'right'
+  html.setAttribute('data-hand', hand);
+  btnLeft .classList.toggle('active', hand === 'left');
+  btnRight.classList.toggle('active', hand === 'right');
+  try { localStorage.setItem('fb-hand', hand); } catch(_) {}
+  buildTable(hand);
+  hintEl.textContent = hand === 'left'
+    ? 'Left-handed · String 1 (thinnest) at top · Nut at right · Frets 1–12 (right → left) · Dots at 3, 5, 7, 9, 12'
+    : 'Right-handed · String 1 (thinnest) at top · Nut at left · Frets 1–12 (left → right) · Dots at 3, 5, 7, 9, 12';
+}
+
+btnLeft .addEventListener('click', () => applyHand('left'));
+btnRight.addEventListener('click', () => applyHand('right'));
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function td(cls, html) {
+function makeTd(cls, html) {
   const el = document.createElement('td');
-  if (cls) el.className = cls;
+  if (cls)  el.className   = cls;
   if (html !== undefined) el.innerHTML = html;
   return el;
 }
 
 function noteCell(note) {
   const isSharp = note.includes('#');
-  if (isSharp && !SHOW_SHARPS) return td('fc');
-  return td('fc', `<span class="n${isSharp ? ' sharp' : ''}">${note}</span>`);
+  if (isSharp && !SHOW_SHARPS) return makeTd('fc');
+  return makeTd('fc', `<span class="n${isSharp ? ' sharp' : ''}">${note}</span>`);
 }
 
-// ── Build table ───────────────────────────────────────────────────────────────
-// Column order: fret 12 … fret 1 | NUT | open-note + string-number
-const table = document.getElementById('fb');
-
-function makeNumRow(cls) {
-  const tr = document.createElement('tr');
-  tr.className = cls;
-  for (let f = NUM_FRETS; f >= 1; f--) tr.appendChild(td('', f));
-  tr.appendChild(td('nut-col'));
-  tr.appendChild(td('', ''));
-  return tr;
-}
-
-table.appendChild(makeNumRow('fret-nums'));
-
-STRINGS.forEach(str => {
-  const tr = document.createElement('tr');
-  tr.className = `string-row ${str.cls}`;
-  for (let f = NUM_FRETS; f >= 1; f--) tr.appendChild(noteCell(str.notes[f]));
-  tr.appendChild(td('nut-col'));
-  const label = td('label-col');
-  label.innerHTML =
-    `<span class="lname">${str.notes[0]}</span><span class="lnum">${str.num}</span>`;
-  tr.appendChild(label);
-  table.appendChild(tr);
-});
-
-// Dot marker row
-const dotRow = document.createElement('tr');
-dotRow.className = 'dots';
-for (let f = NUM_FRETS; f >= 1; f--) {
-  const cell = td('');
+function dotCell(f) {
+  const cell = makeTd('');
   if (DOT_FRETS.has(f)) {
     cell.innerHTML = f === 12
       ? '<span class="dot"></span>&thinsp;<span class="dot"></span>'
       : '<span class="dot"></span>';
   }
-  dotRow.appendChild(cell);
+  return cell;
 }
-dotRow.appendChild(td('nut-col'));
-dotRow.appendChild(td(''));
-table.appendChild(dotRow);
 
-table.appendChild(makeNumRow('fret-nums-bottom'));
+// ── Table builder ─────────────────────────────────────────────────────────────
+function buildTable(hand) {
+  table.innerHTML = '';
+  const leftHanded = hand === 'left';
+
+  // Fret sequence for cell iteration
+  // Left-handed : columns go fret12 … fret1  | NUT | label
+  // Right-handed: columns go label | NUT | fret1  … fret12
+  const fretSeq = leftHanded
+    ? Array.from({length: NUM_FRETS}, (_, i) => NUM_FRETS - i)   // 12 → 1
+    : Array.from({length: NUM_FRETS}, (_, i) => i + 1);           // 1 → 12
+
+  function makeNumRow(rowCls) {
+    const tr = document.createElement('tr');
+    tr.className = rowCls;
+    if (!leftHanded) {
+      tr.appendChild(makeTd('', ''));   // placeholder for label column
+      tr.appendChild(makeTd('nut-col'));
+    }
+    fretSeq.forEach(f => tr.appendChild(makeTd('', f)));
+    if (leftHanded) {
+      tr.appendChild(makeTd('nut-col'));
+      tr.appendChild(makeTd('', ''));
+    }
+    return tr;
+  }
+
+  // Top fret numbers
+  table.appendChild(makeNumRow('fret-nums'));
+
+  // String rows
+  STRINGS.forEach(str => {
+    const tr = document.createElement('tr');
+    tr.className = `string-row ${str.cls}`;
+
+    const label = makeTd('label-col');
+    label.innerHTML =
+      `<span class="lname">${str.notes[0]}</span><span class="lnum">${str.num}</span>`;
+
+    if (!leftHanded) {
+      tr.appendChild(label);
+      tr.appendChild(makeTd('nut-col'));
+    }
+    fretSeq.forEach(f => tr.appendChild(noteCell(str.notes[f])));
+    if (leftHanded) {
+      tr.appendChild(makeTd('nut-col'));
+      tr.appendChild(label);
+    }
+    table.appendChild(tr);
+  });
+
+  // Dot marker row
+  const dotRow = document.createElement('tr');
+  dotRow.className = 'dots';
+  if (!leftHanded) {
+    dotRow.appendChild(makeTd(''));
+    dotRow.appendChild(makeTd('nut-col'));
+  }
+  fretSeq.forEach(f => dotRow.appendChild(dotCell(f)));
+  if (leftHanded) {
+    dotRow.appendChild(makeTd('nut-col'));
+    dotRow.appendChild(makeTd(''));
+  }
+  table.appendChild(dotRow);
+
+  // Bottom fret numbers
+  table.appendChild(makeNumRow('fret-nums-bottom'));
+}
+
+// ── Initialise ────────────────────────────────────────────────────────────────
+(function initHand() {
+  let saved; try { saved = localStorage.getItem('fb-hand'); } catch(_) {}
+  applyHand(saved || 'left');   // default: left-handed
+})();
 </script>
 
 </body>
